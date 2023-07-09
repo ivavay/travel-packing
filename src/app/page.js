@@ -1,113 +1,122 @@
-import Image from 'next/image'
+'use client';
+import { useState } from "react";
+import "./globals.css"
+
+// intial list items 
+const initialItems = [
+  { id: 1, description: "passports", quantity: 2, packed: false },
+  { id: 2, description: "socks", quantity: 4, packed: true },
+  { id: 3, description: "shirts", quantity: 2, packed: false },
+  { id: 4, description: "towels", quantity: 4, packed: true },
+];
 
 export default function Home() {
+  const [items, setItems] = useState([])
+
+  //  takes an item as a parameter and updates the state of items by adding the item to the existing array of item 
+  function handleAddItems(item) {
+    setItems((items => [...items, item]))
+  }
+  function handleDeleteItem(id) {
+    setItems((item => item.filter((item) => item.id !== id) ))
+  }
+
+  // uses tertiary operator instead of if/else to check if the current id is equal to the id argument. 
+  // if it is, it toggles the packed value
+  function handleToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <div>
+      <Form onAddItems={handleAddItems}/>
+      <List items={items} onDeleteItem={handleDeleteItem} onToggleItem={handleToggleItem}/>
+      <Stats items={items}/>
+    </div>
+  )
+}
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+function Form({onAddItems}) {
+  // you can open components under dev tools to see if the states are working
+  const [quantity, setQuantity] = useState(2)
+  const [description, setDescription] = useState("")
+
+  // prevents the page from refreshing upon submit
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log(e)
+    const newItem = { description, quantity, packed: false, id: Date.now() }
+    console.log(newItem)
+    onAddItems(newItem)
+    setDescription("")
+    setQuantity(1)
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="p-24">
+        <h1 className="py-8">What do you want to pack today?</h1>
+        <select type="multiple" className="rounded mx-2" value={quantity} onChange={(e)=>setQuantity(Number(e.target.value))}>
+          // the array method generates numbers from 1 to 20 and we use the map method to loop a value and a key for each option 
+          {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+            <option value={num} key={num}>
+              {num}
+            </option>
+          ))}
+        </select>
+        <input 
+          type="text" 
+          className="rounded" 
+          value={description}
+          onChange={(e)=>setDescription(e.target.value)} 
         />
+        <button className="p-2 px-4 rounded mx-2">Add</button>
       </div>
+    </form>
+  )
+}
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+function List({items, onDeleteItem, onToggleItem}) {
+  return (
+    <ul className="flex flex-wrap px-24">
+    {items.map((item) => (
+      <Item item={item}  key={item.id} onDeleteItem={onDeleteItem} onToggleItem={onToggleItem}/>
+    ))} 
+  </ul>
+  )
+}
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
+function Item({ item, onDeleteItem, onToggleItem }) {
+  return (
+    // ternary operator - if item is packed then strikethrough, if not then left blank
+    <li className="mx-4 mt-8">
+      <input type="checkbox" className="mx-4" onClick={() => onToggleItem(item.id)} />
+      <span style={item.packed ? { textDecoration: "line-through" } : {}}>
+        {item.quantity} {item.description}
+      </span>
+      <button className="delete mx-2" onClick={() => onDeleteItem(item.id)}>❌</button>
+    </li>
+  );
+}
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+function Stats({items}) {
+  // varaiable that updates based on items in array 
+  const numItems = items.length
+  const numPacked = items.filter((item) => item.packed).length
+  const packedPercentage = Math.round(numPacked / numItems * 100)
+  // uses template literals with backticks instead of quotes
+  const initalMessage = `You have ${numItems} items on your list, and you have already packed ${numPacked} (${packedPercentage}%)`
+  const finishedMessage = "You got everything! Ready to go 🏝️"
+
+  // renders message depending on condition of packing status 
+  return (
+   <div>
+       { packedPercentage === 100 ?  <p className="p-24">{finishedMessage} </p>: <p className="p-24">{initalMessage}</p>
+      }
+  </div>
   )
 }
