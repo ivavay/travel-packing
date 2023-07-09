@@ -22,12 +22,15 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 This project was a spin on a course project in Udemy. In my version, I built my own UI and tried writing some of the code my own. 
 
-Concepts I learned and got more pratice on: 
+Concepts I learned and got more practice on ✨: 
+
 - installing next js (react framework) and using it for the first time
 - tailwind css
 - rendering static list items from an array 
 - state management, lifting state up from child to parent
 - derived state: state that is computed from another existing state
+
+Takeaways: Completed within 3 days and ready to take on another challenge that also utilizes CRUD!
 
 ## Deploy on Vercel
 
