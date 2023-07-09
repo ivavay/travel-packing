@@ -109,13 +109,13 @@ function Stats({items}) {
   const numPacked = items.filter((item) => item.packed).length
   const packedPercentage = Math.round(numPacked / numItems * 100)
   // uses template literals with backticks instead of quotes
-  const initalMessage = `You have ${numItems} items on your list, and you have already packed ${numPacked} (${packedPercentage}%)`
+  const initalMessage = `You have ${numItems} items on your list, and you have already packed ${numPacked} (${numItems === 0 ? "0%" : packedPercentage + "%" })`
   const finishedMessage = "You got everything! Ready to go 🏝️"
 
   // renders message depending on condition of packing status 
   return (
    <div>
-       { packedPercentage === 100 ?  <p className="p-24">{finishedMessage} </p>: <p className="p-24">{initalMessage}</p>
+      { packedPercentage === 100 ?  <p className="p-24">{finishedMessage} </p>: <p className="p-24">{initalMessage}</p>
       }
   </div>
   )
